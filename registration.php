@@ -1,42 +1,51 @@
 <?php
 
-//DB connection file
-require "dbconnect.php";
+	//DB connection file
+	//require 'dbconnect.php';
+	require('functions.php');
 
-if($_SERVER("REQUEST_METHOD") == "POST"){
+	// json response array
+	$response = array("error" => FALSE);
 
-	$name = mysqli_real_escape_string($con,$_POST["name"]);
-	$email = mysqli_real_escape_string($con,$_POST["email"]);
-	$contactno = mysqli_real_escape_string($con,$_POST["contactno"]);
+		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
-	//Query to check whether the user exist or not
-	$query = "SELECT * FROM registration WHERE email = $email";
-	$result = $conn->query($query);
+			//Receiving the parameters
+			$name = mysqli_real_escape_string($con,$_POST["name"]);
+			$email = mysqli_real_escape_string($con,$_POST["email"]);
+			$contactno = mysqli_real_escape_string($con,$_POST["contactno"]);
+			$password = md5(mysqli_real_escape_string($con,$_POST["password"]));
 
-		if (mysqli_num_rows($result) > 0){
-			echo "USER EXIST";
+			//Checking whether the user exists or not
+			if (isUserExisted($email)) {
+			        // user already exists
+			        $response["error"] = TRUE;
+			        $response["error_msg"] = "User already exists with " . $email;
+			        echo json_encode($response);
+			    }	else {
+			        // create a new user
+			        $user = storeUser($name, $email, $contactno,$password); 
+					        if ($user) {
+		            			// user stored successfully
+					            $response["error"] = FALSE;
+					            $response["user"]["name"] = $user["name"];
+					            $response["user"]["email"] = $user["email"];
+					            $response["user"]["contactno"] = $user["contactno"];
+					            $response["user"]["password"] = $user["password"];
+					            echo json_encode($response);
+					        } else {
+					            // user failed to store
+					            $response["error"] = TRUE;
+					            $response["error_msg"] = "Failed to Register!";
+					            echo json_encode($response);
+					        }
+					     }  
+
+		} else {
+		    $response["error"] = TRUE;
+		    $response["error_msg"] = "Required parameters (name, email or contactno) is missing!";
+		    echo json_encode($response);
 		}
+				
 
-		else{
-			//Query to insert data into DB
-			$qryinsert = "INSERT INTO registration(name,email,contactno)
-						  VALUES ('$name','$email','$contactno')";
-
-			$insertResult = mysqli_query($con,$qryinsert);
-
-			//Check whether the registration is successful or not
-			if($insertResult){
-				echo "Registration Successful";
-			}
-			else{
-				echo "Registration Failed";
-			}
-		}
-
-	}
-
-else{
-	echo "CONNECTION FAILED";
-}
-
+				
 ?>
