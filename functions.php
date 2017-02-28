@@ -2,14 +2,17 @@
 
 	include("dbconnect.php");
 
+
+	class DB_functions	{
+
 	/**
 	*Store new user
-	*
 	*/
-	function storeUser($name,$email,$contact,$password){
+
+	public function storeUser($name,$email,$contact,$password){
 
 		$stmt = $con->prepare("INSERT INTO registration(name, email,contactno,password) VALUES(?, ?, ?,?)");
-		$stmt->bind_param("ssi",$name, $email, $contactno,$password);
+		$stmt->bind_param("ssis",$name, $email, $contactno,$password);
 		$result = $stmt->execute();
 		$stmt->close();
 
@@ -32,7 +35,7 @@
     *Check whether the user already exists or not
     */
 
-    function isUserExisted($email){
+    public function isUserExisted($email){
 
     	$stmt = $con->prepare("SELECT email from registration WHERE email = ?");
     	$stmt->bind_param("s",$email);
@@ -53,7 +56,7 @@
     * Get user by email and password for login purpose
     */
 
-    function getUserByEmail($email,$password){
+    public function getUserByEmail($email,$password){
 
     	$stmt = $con->prepare("SELECT * FROM registration WHERE email = ?");
     	$stmt->bind_param("s",$email);

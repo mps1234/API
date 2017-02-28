@@ -7,6 +7,8 @@
 	// json response array
 	$response = array("error" => FALSE);
 
+	$db= new DB_Functions();
+
 		if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
 			//Receiving the parameters
@@ -16,14 +18,14 @@
 			$password = md5(mysqli_real_escape_string($con,$_POST["password"]));
 
 			//Checking whether the user exists or not
-			if (isUserExisted($email)) {
+			if ($db->isUserExisted($email)) {
 			        // user already exists
 			        $response["error"] = TRUE;
 			        $response["error_msg"] = "User already exists with " . $email;
 			        echo json_encode($response);
 			    }	else {
 			        // create a new user
-			        $user = storeUser($name, $email, $contactno,$password); 
+			        $user = $db->storeUser($name, $email, $contactno,$password); 
 					        if ($user) {
 		            			// user stored successfully
 					            $response["error"] = FALSE;
